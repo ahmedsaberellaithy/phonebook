@@ -1,0 +1,46 @@
+version: '3.6'
+
+volumes: 
+ data: {}
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    volumes:
+    - ./config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    ports:
+    - '8080:15672'
+
+  redis:
+    image: redis:latest
+    volumes:
+      - ./config/redis.conf:/redis.conf:ro
+    ports:
+      - '6379:6379'
+    command: [ "redis-server", "/config/redis.conf" ]
+  
+  db:
+    container_name: postgres
+    image: postgres
+    ports:
+      - '5433:${DB_PORT}'
+    volumes:
+      - data:/data/db
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+
+  api:
+    container_name: ${APP_NAME}
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    volumes:
+    - .:/usr/src/app
