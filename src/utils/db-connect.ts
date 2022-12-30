@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 
-export async function connectToDB(dbConfig) {
+export async function connectToDB(dbConfig: any) {
   try {
     const pool = new Pool(dbConfig);
     console.log("Connecting to the DB");
